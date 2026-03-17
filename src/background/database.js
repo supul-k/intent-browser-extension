@@ -1,13 +1,11 @@
-// database.js - IndexedDB wrapper for Intent
-
-class IntentDatabase {
+// database.js - Full IndexedDB implementation
+export class IntentDatabase {
   constructor() {
     this.dbName = 'IntentDB';
     this.dbVersion = 1;
     this.db = null;
   }
 
-  // Initialize database
   async init() {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
@@ -15,13 +13,13 @@ class IntentDatabase {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
+        console.log('✅ IndexedDB initialized');
         resolve();
       };
 
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
         
-        // Create visits store
         if (!db.objectStoreNames.contains('visits')) {
           const visitStore = db.createObjectStore('visits', { 
             keyPath: 'id', 
@@ -32,7 +30,6 @@ class IntentDatabase {
           visitStore.createIndex('date', 'date', { unique: false });
         }
         
-        // Create intentions store
         if (!db.objectStoreNames.contains('intentions')) {
           const intentionStore = db.createObjectStore('intentions', { 
             keyPath: 'id', 
@@ -41,7 +38,6 @@ class IntentDatabase {
           intentionStore.createIndex('timestamp', 'timestamp', { unique: false });
         }
         
-        // Create actions store (for mindful moments)
         if (!db.objectStoreNames.contains('actions')) {
           const actionStore = db.createObjectStore('actions', { 
             keyPath: 'id', 
@@ -50,29 +46,19 @@ class IntentDatabase {
           actionStore.createIndex('timestamp', 'timestamp', { unique: false });
           actionStore.createIndex('domain', 'domain', { unique: false });
         }
-        
-        // Create daily summaries store
-        if (!db.objectStoreNames.contains('dailySummaries')) {
-          const summaryStore = db.createObjectStore('dailySummaries', { 
-            keyPath: 'date' 
-          });
-        }
       };
     });
   }
 
-  // Add a visit
   async addVisit(visit) {
     const visitData = {
       ...visit,
       timestamp: Date.now(),
-      date: new Date().toISOString().split('T')[0] // YYYY-MM-DD
+      date: new Date().toISOString().split('T')[0]
     };
-    
     return this.add('visits', visitData);
   }
 
-  // Add an intention
   async addIntention(intention) {
     return this.add('intentions', {
       intention,
@@ -81,7 +67,6 @@ class IntentDatabase {
     });
   }
 
-  // Add an action (mindful moment)
   async addAction(action) {
     return this.add('actions', {
       ...action,
@@ -90,7 +75,6 @@ class IntentDatabase {
     });
   }
 
-  // Generic add method
   async add(storeName, data) {
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction([storeName], 'readwrite');
@@ -102,7 +86,6 @@ class IntentDatabase {
     });
   }
 
-  // Get visits for a date range
   async getVisits(startDate, endDate) {
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction(['visits'], 'readonly');
@@ -117,9 +100,21 @@ class IntentDatabase {
     });
   }
 
-  // Get today's summary
+  async getAll(storeName, startTime, endTime) {
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction([storeName], 'readonly');
+      const store = transaction.objectStore(storeName);
+      const index = store.index('timestamp');
+      
+      const range = IDBKeyRange.bound(startTime, endTime);
+      const request = index.getAll(range);
+      
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   async getTodaySummary() {
-    const today = new Date().toISOString().split('T')[0];
     const startOfDay = new Date().setHours(0, 0, 0, 0);
     const endOfDay = new Date().setHours(23, 59, 59, 999);
     
@@ -129,11 +124,9 @@ class IntentDatabase {
       this.getAll('intentions', startOfDay, endOfDay)
     ]);
     
-    // Get categories from settings
     const settings = await this.getSettings();
     const categories = settings?.categories || {};
     
-    // Calculate stats
     const stats = {
       totalTime: 0,
       focusTime: 0,
@@ -144,7 +137,6 @@ class IntentDatabase {
       topSites: []
     };
     
-    // Aggregate by domain
     const domainStats = {};
     
     visits.forEach(visit => {
@@ -165,7 +157,6 @@ class IntentDatabase {
       domainStats[visit.domain].totalTime += visit.duration;
     });
     
-    // Get top sites
     stats.topSites = Object.values(domainStats)
       .sort((a, b) => b.totalTime - a.totalTime)
       .slice(0, 5);
@@ -173,45 +164,12 @@ class IntentDatabase {
     return stats;
   }
 
-  // Get all items from a store within time range
-  async getAll(storeName, startTime, endTime) {
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction([storeName], 'readonly');
-      const store = transaction.objectStore(storeName);
-      const index = store.index('timestamp');
-      
-      const range = IDBKeyRange.bound(startTime, endTime);
-      const request = index.getAll(range);
-      
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  // Get settings
   async getSettings() {
     return new Promise((resolve) => {
       chrome.storage.local.get(['settings'], (result) => {
         resolve(result.settings);
       });
     });
-  }
-
-  // Generate weekly report
-  async getWeeklyReport() {
-    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    const visits = await this.getVisits(oneWeekAgo, Date.now());
-    
-    // Group by date
-    const byDate = {};
-    visits.forEach(visit => {
-      if (!byDate[visit.date]) {
-        byDate[visit.date] = [];
-      }
-      byDate[visit.date].push(visit);
-    });
-    
-    return byDate;
   }
 }
 
