@@ -1,15 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Load today's stats
   loadTodayStats();
+  loadCurrentIntention();
   
   // Set intention button
   document.getElementById('set-intention').addEventListener('click', () => {
     const intention = document.getElementById('intention-input').value;
     if (intention) {
-      chrome.storage.local.set({ currentIntention: intention });
-      document.getElementById('intention-input').value = '';
-      alert('Intention set!');
+      // Send to background
+      chrome.runtime.sendMessage(
+        { type: 'SET_INTENTION', intention: intention },
+        (response) => {
+          if (response?.success) {
+            document.getElementById('intention-input').value = '';
+            document.getElementById('current-intention-display').textContent = intention;
+            showStatus('Intention set!', 'success');
+          }
+        }
+      );
     }
+  });
+  
+  // Quick intentions
+  document.querySelectorAll('.quick-intention').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const intention = btn.dataset.intention;
+      chrome.runtime.sendMessage(
+        { type: 'SET_INTENTION', intention: intention },
+        () => {
+          document.getElementById('current-intention-display').textContent = intention;
+        }
+      );
+    });
   });
   
   // Open options
@@ -17,38 +38,45 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     chrome.runtime.openOptionsPage();
   });
+  
+  // Refresh stats
+  document.getElementById('refresh-stats').addEventListener('click', loadTodayStats);
 });
 
 function loadTodayStats() {
-  chrome.storage.local.get(['visits'], (result) => {
-    const visits = result.visits || [];
-    const today = new Date().setHours(0, 0, 0, 0);
-    
-    // Filter today's visits
-    const todayVisits = visits.filter(v => v.timestamp >= today);
-    
-    // Get settings to categorize domains
-    chrome.storage.local.get(['settings'], (settingsResult) => {
-      const settings = settingsResult.settings || {};
-      const categories = settings.categories || {};
-      
-      let focusTime = 0;
-      let distractionTime = 0;
-      
-      todayVisits.forEach(visit => {
-        const category = categories[visit.domain] || 'neutral';
-        if (category === 'focus') {
-          focusTime += visit.duration;
-        } else if (category === 'distraction') {
-          distractionTime += visit.duration;
-        }
-      });
-      
-      // Update UI
-      document.getElementById('focus-time').textContent = 
-        Math.round(focusTime / 60) + 'm';
-      document.getElementById('distraction-time').textContent = 
-        Math.round(distractionTime / 60) + 'm';
-    });
+  chrome.runtime.sendMessage(
+    { type: 'GET_TODAY_STATS' },
+    (stats) => {
+      if (stats) {
+        document.getElementById('focus-time').textContent = 
+          Math.round(stats.focusTime / 60) + 'm';
+        document.getElementById('distraction-time').textContent = 
+          Math.round(stats.distractionTime / 60) + 'm';
+        document.getElementById('interruptions').textContent = 
+          stats.interruptions;
+        document.getElementById('resisted').textContent = 
+          stats.resisted;
+      }
+    }
+  );
+}
+
+function loadCurrentIntention() {
+  chrome.storage.local.get(['currentIntention'], (result) => {
+    if (result.currentIntention) {
+      document.getElementById('current-intention-display').textContent = 
+        result.currentIntention;
+    }
   });
+}
+
+function showStatus(message, type) {
+  const status = document.getElementById('status-message');
+  status.textContent = message;
+  status.className = `status ${type}`;
+  status.style.display = 'block';
+  
+  setTimeout(() => {
+    status.style.display = 'none';
+  }, 2000);
 }
