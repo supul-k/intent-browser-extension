@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Intent Settings</h1>
+    
+    <section>
+      <h2>Site Categories</h2>
+      <p>Mark domains as focus or distraction:</p>
+      <div id="site-categories">
+        <!-- Will be populated by JavaScript -->
+      </div>
+      <button id="add-domain">Add Domain</button>
+    </section>
+    
+    <section>
+      <h2>Mindful Access</h2>
+      <label>
+        <input type="checkbox" id="mindful-access-enabled">
+        Enable mindful access for distraction sites
+      </label>
+      <br>
+      <label>
+        Delay before loading (seconds):
+        <input type="number" id="mindful-delay" min="0" max="30" value="5">
+      </label>
+    </section>
+    
+    <section>
+      <h2>Data</h2>
+      <button id="export-data">Export Data</button>
+      <button id="import-data">Import Data</button>
+    </section>
+    
+    <button id="save-settings">Save Settings</button>
+    <div id="status"></div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>

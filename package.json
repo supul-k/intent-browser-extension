@@ -1,0 +1,29 @@
+{
+  "name": "intent-browser-extension",
+  "version": "1.0.0",
+  "description": "A mindful browsing companion that helps you use technology with intention",
+  "scripts": {
+    "build": "cp -r src/* dist/"
+  },
+  "keywords": [
+    "browser-extension",
+    "mindful",
+    "productivity"
+  ],
+  "author": "",
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/supul-k/intent-browser-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/supul-k/intent-browser-extension/issues"
+  },
+  "homepage": "https://github.com/supul-k/intent-browser-extension#readme",
+  "devDependencies": {
+    "copy-webpack-plugin": "^14.0.0",
+    "webpack": "^5.105.4",
+    "webpack-cli": "^7.0.2"
+  }
+}
