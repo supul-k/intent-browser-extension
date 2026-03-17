@@ -13,12 +13,7 @@
     "<all_urls>"
   ],
   "action": {
-    "default_popup": "popup/popup.html",
-    "default_icon": {
-      "16": "icons/ic_eye.svg",
-      "48": "icons/pdf-icon.svg",
-      "128": "icons/settings.svg"
-    }
+    "default_popup": "popup/popup.html"
   },
   "options_page": "options/options.html",
   "background": {
@@ -30,10 +25,6 @@
       "matches": ["<all_urls>"],
       "js": ["content/content.js"]
     }
-  ],
-  "icons": {
-    "16": "icons/ic_eye.svg",
-    "48": "icons/pdf-icon.svg",
-    "128": "icons/settings.svg"
-  }
+  ]
+
 }
