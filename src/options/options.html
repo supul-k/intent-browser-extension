@@ -2,95 +2,139 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <title>Intent Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
   <div class="container">
-    <h1>Intent Settings</h1>
-    
-    <nav class="tabs">
-      <button class="tab-button active" data-tab="categories">Categories</button>
-      <button class="tab-button" data-tab="mindful">Mindful Access</button>
-      <button class="tab-button" data-tab="data">Data Management</button>
-      <button class="tab-button" data-tab="insights">Insights</button>
-    </nav>
-    
-    <!-- Categories Tab -->
-    <div id="categories-tab" class="tab-content active">
+    <header>
+      <h1>🧘 Intent Settings</h1>
+      <p class="subtitle">Customize your mindful browsing experience</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-button active" data-tab="sites">Sites</button>
+      <button class="tab-button" data-tab="preferences">Preferences</button>
+      <button class="tab-button" data-tab="data">Data</button>
+      <button class="tab-button" data-tab="about">About</button>
+    </div>
+
+    <!-- Sites Tab -->
+    <div id="sites-tab" class="tab-content active">
       <h2>Site Categories</h2>
-      <p class="help-text">Mark domains as focus, distraction, or neutral</p>
+      <p class="help-text">Mark sites as distraction, focus, or neutral</p>
       
-      <div id="site-categories-list"></div>
-      
-      <div class="add-domain">
-        <input type="text" id="new-domain" placeholder="e.g., example.com">
-        <select id="new-category">
-          <option value="focus">Focus</option>
-          <option value="distraction">Distraction</option>
-          <option value="neutral">Neutral</option>
-        </select>
-        <button id="add-domain-btn">Add</button>
+      <div class="category-legend">
+        <span class="legend-item"><span class="dot distraction"></span> Distraction - shows modal</span>
+        <span class="legend-item"><span class="dot focus"></span> Focus - tracked as productive</span>
+        <span class="legend-item"><span class="dot neutral"></span> Neutral - just tracked</span>
+      </div>
+
+      <div class="search-box">
+        <input type="text" id="site-search" placeholder="Search sites...">
+      </div>
+
+      <div id="sites-list" class="sites-list">
+        <!-- Sites will be loaded here -->
+      </div>
+
+      <div class="add-site">
+        <h3>Add New Site</h3>
+        <div class="add-site-form">
+          <input type="text" id="new-site" placeholder="e.g., twitter.com">
+          <select id="new-category">
+            <option value="distraction">🚫 Distraction</option>
+            <option value="focus">🎯 Focus</option>
+            <option value="neutral">⚪ Neutral</option>
+          </select>
+          <button id="add-site-btn" class="primary">Add Site</button>
+        </div>
+        <p class="note">Enter domain only (e.g., facebook.com, not https://facebook.com)</p>
       </div>
     </div>
-    
-    <!-- Mindful Access Tab -->
-    <div id="mindful-tab" class="tab-content">
-      <h2>Mindful Access Settings</h2>
+
+    <!-- Preferences Tab -->
+    <div id="preferences-tab" class="tab-content">
+      <h2>Mindful Access Preferences</h2>
       
-      <label class="checkbox-label">
-        <input type="checkbox" id="mindful-enabled">
-        Enable mindful access for distraction sites
-      </label>
-      
-      <div class="setting-group">
-        <label>Delay before loading (seconds):</label>
-        <input type="number" id="mindful-delay" min="0" max="30" value="5">
+      <div class="preference-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="mindful-enabled">
+          <span>Enable mindful access for distraction sites</span>
+        </label>
+        <p class="help-text">When enabled, you'll see a modal before entering distraction sites</p>
       </div>
-      
-      <div class="setting-group">
-        <label>Snooze duration (minutes):</label>
+
+      <div class="preference-group">
+        <label for="modal-delay">Modal delay (seconds):</label>
+        <input type="number" id="modal-delay" min="1" max="30" value="5">
+        <p class="help-text">How long the modal stays before auto-continuing</p>
+      </div>
+
+      <div class="preference-group">
+        <label for="snooze-duration">Snooze duration (minutes):</label>
         <input type="number" id="snooze-duration" min="5" max="120" value="30">
+        <p class="help-text">How long to temporarily disable modal for a site</p>
+      </div>
+
+      <div class="preference-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="show-stats">
+          <span>Show daily stats in popup</span>
+        </label>
       </div>
     </div>
-    
-    <!-- Data Management Tab -->
+
+    <!-- Data Tab -->
     <div id="data-tab" class="tab-content">
       <h2>Data Management</h2>
       
       <div class="data-stats">
         <h3>Storage Usage</h3>
-        <div id="storage-stats"></div>
+        <div id="storage-info">Loading...</div>
       </div>
-      
+
       <div class="data-actions">
-        <button id="export-data">Export Data (JSON)</button>
-        <button id="import-data">Import Data</button>
+        <button id="export-data" class="secondary">📥 Export Settings</button>
+        <button id="import-data" class="secondary">📤 Import Settings</button>
         <input type="file" id="import-file" accept=".json" style="display: none;">
-        <button id="clear-data" class="danger">Clear All Data</button>
+        <button id="reset-data" class="danger">⚠️ Reset All Settings</button>
       </div>
+
+      <div class="preview-section">
+        <h3>Current Categories Preview</h3>
+        <pre id="data-preview"></pre>
+      </div>
+    </div>
+
+    <!-- About Tab -->
+    <div id="about-tab" class="tab-content">
+      <h2>About Intent</h2>
+      <p>Version 1.0.0</p>
+      <p>A mindful browsing extension to help you use technology with intention.</p>
       
-      <div class="data-preview">
-        <h3>Recent Activity</h3>
-        <div id="recent-activity"></div>
-      </div>
+      <h3>How it works</h3>
+      <ul>
+        <li>Set an intention when you start browsing</li>
+        <li>When you visit a distraction site, you'll see a mindful moment</li>
+        <li>Track your focus time and build better habits</li>
+      </ul>
+
+      <h3>Support</h3>
+      <p>Questions or feedback? <a href="#" id="feedback-link">Send feedback</a></p>
+      
+      <h3>Privacy</h3>
+      <p>All your data stays on your device. No tracking, no analytics, no cloud storage.</p>
     </div>
-    
-    <!-- Insights Tab -->
-    <div id="insights-tab" class="tab-content">
-      <h2>Weekly Insights</h2>
-      <div id="insights-chart"></div>
-      <div id="insights-stats"></div>
+
+    <div class="actions-footer">
+      <button id="save-settings" class="primary">💾 Save All Settings</button>
+      <button id="reset-defaults" class="secondary">↺ Reset to Defaults</button>
     </div>
-    
-    <div class="actions">
-      <button id="save-settings">Save Settings</button>
-      <button id="reset-defaults">Reset to Defaults</button>
-    </div>
-    
-    <div id="status" class="status"></div>
+
+    <div id="status-message" class="status"></div>
   </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="options.js"></script>
+
+  <script src="../options.js"></script>
 </body>
 </html>

@@ -124,3 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 });
+
+// Open options page
+document.getElementById('open-options').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (chrome.runtime.openOptionsPage) {
+    chrome.runtime.openOptionsPage();
+  } else {
+    window.open(chrome.runtime.getURL('options/options.html'));
+  }
+});
