@@ -8,37 +8,89 @@
   <div class="container">
     <h1>Intent Settings</h1>
     
-    <section>
-      <h2>Site Categories</h2>
-      <p>Mark domains as focus or distraction:</p>
-      <div id="site-categories">
-        <!-- Will be populated by JavaScript -->
-      </div>
-      <button id="add-domain">Add Domain</button>
-    </section>
+    <nav class="tabs">
+      <button class="tab-button active" data-tab="categories">Categories</button>
+      <button class="tab-button" data-tab="mindful">Mindful Access</button>
+      <button class="tab-button" data-tab="data">Data Management</button>
+      <button class="tab-button" data-tab="insights">Insights</button>
+    </nav>
     
-    <section>
-      <h2>Mindful Access</h2>
-      <label>
-        <input type="checkbox" id="mindful-access-enabled">
+    <!-- Categories Tab -->
+    <div id="categories-tab" class="tab-content active">
+      <h2>Site Categories</h2>
+      <p class="help-text">Mark domains as focus, distraction, or neutral</p>
+      
+      <div id="site-categories-list"></div>
+      
+      <div class="add-domain">
+        <input type="text" id="new-domain" placeholder="e.g., example.com">
+        <select id="new-category">
+          <option value="focus">Focus</option>
+          <option value="distraction">Distraction</option>
+          <option value="neutral">Neutral</option>
+        </select>
+        <button id="add-domain-btn">Add</button>
+      </div>
+    </div>
+    
+    <!-- Mindful Access Tab -->
+    <div id="mindful-tab" class="tab-content">
+      <h2>Mindful Access Settings</h2>
+      
+      <label class="checkbox-label">
+        <input type="checkbox" id="mindful-enabled">
         Enable mindful access for distraction sites
       </label>
-      <br>
-      <label>
-        Delay before loading (seconds):
+      
+      <div class="setting-group">
+        <label>Delay before loading (seconds):</label>
         <input type="number" id="mindful-delay" min="0" max="30" value="5">
-      </label>
-    </section>
+      </div>
+      
+      <div class="setting-group">
+        <label>Snooze duration (minutes):</label>
+        <input type="number" id="snooze-duration" min="5" max="120" value="30">
+      </div>
+    </div>
     
-    <section>
-      <h2>Data</h2>
-      <button id="export-data">Export Data</button>
-      <button id="import-data">Import Data</button>
-    </section>
+    <!-- Data Management Tab -->
+    <div id="data-tab" class="tab-content">
+      <h2>Data Management</h2>
+      
+      <div class="data-stats">
+        <h3>Storage Usage</h3>
+        <div id="storage-stats"></div>
+      </div>
+      
+      <div class="data-actions">
+        <button id="export-data">Export Data (JSON)</button>
+        <button id="import-data">Import Data</button>
+        <input type="file" id="import-file" accept=".json" style="display: none;">
+        <button id="clear-data" class="danger">Clear All Data</button>
+      </div>
+      
+      <div class="data-preview">
+        <h3>Recent Activity</h3>
+        <div id="recent-activity"></div>
+      </div>
+    </div>
     
-    <button id="save-settings">Save Settings</button>
-    <div id="status"></div>
+    <!-- Insights Tab -->
+    <div id="insights-tab" class="tab-content">
+      <h2>Weekly Insights</h2>
+      <div id="insights-chart"></div>
+      <div id="insights-stats"></div>
+    </div>
+    
+    <div class="actions">
+      <button id="save-settings">Save Settings</button>
+      <button id="reset-defaults">Reset to Defaults</button>
+    </div>
+    
+    <div id="status" class="status"></div>
   </div>
-  <script src="options.js"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="options.js"></script>
 </body>
 </html>

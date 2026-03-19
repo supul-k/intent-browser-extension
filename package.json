@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "A mindful browsing companion that helps you use technology with intention",
   "scripts": {
-    "build": "cp -r src/* dist/"
+    "build": "webpack",
+    "watch": "webpack --watch"
   },
   "keywords": [
     "browser-extension",
@@ -22,6 +23,9 @@
   },
   "homepage": "https://github.com/supul-k/intent-browser-extension#readme",
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "babel-loader": "^10.1.1",
     "copy-webpack-plugin": "^14.0.0",
     "webpack": "^5.105.4",
     "webpack-cli": "^7.0.2"

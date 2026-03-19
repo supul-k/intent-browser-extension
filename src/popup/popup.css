@@ -1,65 +1,178 @@
 body {
-  width: 300px;
-  padding: 10px;
+  width: 350px;
+  padding: 16px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  margin: 0;
+  background: #f8fafc;
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
 h1 {
   font-size: 24px;
   margin: 0;
   color: #2c3e50;
-}
-
-h2 {
-  font-size: 16px;
-  margin: 0 0 10px 0;
-  color: #34495e;
+  text-align: center;
 }
 
 h3 {
   font-size: 14px;
-  margin: 0 0 5px 0;
-  color: #7f8c8d;
+  margin: 0 0 10px 0;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.panel {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.intention-display {
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1e293b;
+  text-align: center;
+  font-style: italic;
 }
 
 #intention-section {
   display: flex;
-  gap: 5px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 #intention-input {
-  flex: 1;
-  padding: 5px;
-  border: 1px solid #bdc3c7;
-  border-radius: 3px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+#intention-input:focus {
+  outline: none;
+  border-color: #3498db;
 }
 
 button {
-  padding: 5px 10px;
+  padding: 10px;
   background-color: #3498db;
   color: white;
   border: none;
-  border-radius: 3px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
 button:hover {
   background-color: #2980b9;
 }
 
+.quick-intentions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.quick-intention {
+  flex: 1;
+  padding: 8px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  font-size: 12px;
+}
+
+.quick-intention:hover {
+  background-color: #e2e8f0;
+  color: #1e293b;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.icon-button {
+  padding: 4px 8px;
+  background: none;
+  color: #64748b;
+  font-size: 16px;
+}
+
+.icon-button:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 8px;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.status {
+  padding: 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.status.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 footer {
-  margin-top: 10px;
   text-align: center;
   font-size: 12px;
 }
 
 footer a {
-  color: #7f8c8d;
+  color: #94a3b8;
   text-decoration: none;
+}
+
+footer a:hover {
+  color: #64748b;
 }
