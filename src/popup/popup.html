@@ -2,44 +2,161 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="popup.css">
+  <style>
+    body {
+      width: 320px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      background: #f8fafc;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    h1 {
+      font-size: 24px;
+      margin: 0;
+      color: #2c3e50;
+      text-align: center;
+    }
+    
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .section h3 {
+      margin: 0 0 12px 0;
+      color: #64748b;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+    
+    #current-intention {
+      background: #f1f5f9;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-style: italic;
+      color: #1e293b;
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+    
+    input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    button {
+      padding: 10px 16px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    button:hover {
+      background: #2980b9;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 8px;
+      background: #f8fafc;
+      border-radius: 6px;
+    }
+    
+    .stat-label {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+    }
+    
+    .stat-value {
+      display: block;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    
+    .status {
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+      display: none;
+    }
+    
+    .status.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .test-btn {
+      background: #94a3b8;
+      margin-top: 8px;
+    }
+    
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>🧘 Intent</h1>
     
-    <div id="current-intention-panel" class="panel">
+    <div class="section">
       <h3>Current Intention</h3>
-      <div id="current-intention-display" class="intention-display">
-        Not set
+      <div id="current-intention">Not set</div>
+    </div>
+    
+    <div class="section">
+      <h3>Set New Intention</h3>
+      <div class="input-group">
+        <input type="text" id="intention-input" placeholder="e.g., Deep work for 1 hour">
+        <button id="set-intention">Set</button>
       </div>
     </div>
     
-    <div id="intention-section" class="panel">
-      <h3>Set Intention</h3>
-      <input type="text" id="intention-input" placeholder="e.g., 'Deep work for 1 hour'">
-      <button id="set-intention">Set</button>
-      
-      <div class="quick-intentions">
-        <button class="quick-intention" data-intention="Deep work">🎯 Deep work</button>
-        <button class="quick-intention" data-intention="Learning">📚 Learning</button>
-        <button class="quick-intention" data-intention="Relax">😌 Relax</button>
-      </div>
-    </div>
-    
-    <div id="stats-panel" class="panel">
-      <div class="panel-header">
-        <h3>Today</h3>
-        <button id="refresh-stats" class="icon-button">↻</button>
-      </div>
-      
+    <div class="section">
+      <h3>Today's Stats</h3>
       <div class="stats-grid">
         <div class="stat-item">
-          <span class="stat-label">Focus time</span>
+          <span class="stat-label">Focus Time</span>
           <span class="stat-value" id="focus-time">0m</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Distraction time</span>
+          <span class="stat-label">Distraction</span>
           <span class="stat-value" id="distraction-time">0m</span>
         </div>
         <div class="stat-item">
@@ -53,12 +170,15 @@
       </div>
     </div>
     
-    <div id="status-message" class="status" style="display: none;"></div>
+    <button id="test-connection" class="test-btn">🔌 Test Connection</button>
+    
+    <div id="status-message" class="status"></div>
     
     <footer>
-      <a href="#" id="open-options">Settings</a>
+      <p>Set intentions. Stay focused.</p>
     </footer>
   </div>
+  
   <script src="../popup.js"></script>
 </body>
 </html>

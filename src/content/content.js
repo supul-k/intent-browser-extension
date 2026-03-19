@@ -1,32 +1,93 @@
-// content/content.js
-// This runs on every webpage
-
-// Store the current intention (received from background)
-let currentIntention = null;
-let modalShown = false;
-
-// Listen for messages from background
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('Content script received:', message);
-  
-  if (message.type === 'MINDFUL_CHECK') {
-    // Don't show multiple modals
-    if (!modalShown) {
-      showMindfulModal(message.domain, message.delay);
-    }
-  }
-  
-  if (message.type === 'INTENTION_UPDATED') {
-    currentIntention = message.intention;
-  }
+// content.js - Enhanced debugging
+console.log('🧩 Content script loaded on:', window.location.hostname);
+console.log('🔧 Content script details:', {
+  runtime: !!chrome.runtime,
+  runtimeId: chrome.runtime?.id,
+  hasListeners: !!chrome.runtime?.onMessage,
+  canSendMessage: !!chrome.runtime?.sendMessage
 });
 
-function showMindfulModal(domain, delaySeconds = 5) {
-  modalShown = true;
+// Add visual indicator
+const indicator = document.createElement('div');
+indicator.id = 'intent-debug';
+indicator.style.cssText = `
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #ff4444;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  z-index: 999999;
+  font-family: monospace;
+  font-size: 12px;
+  cursor: pointer;
+`;
+indicator.textContent = '🧠 Intent: Waiting';
+document.body.appendChild(indicator);
+
+// Update indicator when messages received
+function updateIndicator(status, color) {
+  indicator.style.background = color;
+  indicator.textContent = status;
+  setTimeout(() => {
+    indicator.style.background = '#ff4444';
+    indicator.textContent = '🧠 Intent: Active';
+  }, 2000);
+}
+
+// Test sending message to background
+try {
+  chrome.runtime.sendMessage({ type: 'CONTENT_LOADED', url: window.location.href }, (response) => {
+    if (chrome.runtime.lastError) {
+      console.error('❌ Cannot reach background:', chrome.runtime.lastError);
+      indicator.textContent = '❌ No background';
+      indicator.style.background = '#ff4444';
+    } else {
+      console.log('✅ Connected to background:', response);
+      indicator.textContent = '✅ Connected';
+      indicator.style.background = '#44ff44';
+      setTimeout(() => {
+        indicator.style.background = '#ff4444';
+        indicator.textContent = '🧠 Intent: Active';
+      }, 2000);
+    }
+  });
+} catch (e) {
+  console.error('❌ Error sending message:', e);
+}
+
+// Listen for messages
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('📨 CONTENT SCRIPT RECEIVED MESSAGE:', message);
+  console.log('📨 From:', sender);
   
-  // Create modal container
+  // Update indicator
+  updateIndicator('📨 Message!', '#44ff44');
+  
+  if (message.type === 'SHOW_MINDFUL_MODAL') {
+    console.log('🎯 SHOW_MINDFUL_MODAL received!');
+    showMindfulModal(message.domain, message.intention, message.delay);
+    sendResponse({ shown: true, received: true });
+  } else {
+    console.log('❓ Unknown message type:', message.type);
+    sendResponse({ received: true, type: message.type });
+  }
+  
+  return true;
+});
+
+console.log('👂 Content script listener registered');
+console.log('📋 Current listener count:', chrome.runtime.onMessage ? 'has listeners' : 'no listeners');
+function showMindfulModal(domain, currentIntention, delaySeconds = 5) {
+  // Don't show if already showing
+  if (document.getElementById('intent-modal')) return;
+  
+  console.log('🧘 Showing mindful modal for:', domain);
+  
+  // Create modal
   const modal = document.createElement('div');
-  modal.id = 'intent-mindful-modal';
+  modal.id = 'intent-modal';
   modal.innerHTML = `
     <div style="
       position: fixed;
@@ -34,79 +95,113 @@ function showMindfulModal(domain, delaySeconds = 5) {
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.85);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 999999;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      animation: intent-fade-in 0.3s ease;
     ">
       <div style="
         background: white;
-        padding: 30px;
-        border-radius: 12px;
+        padding: 32px;
+        border-radius: 16px;
         max-width: 400px;
+        width: 90%;
         text-align: center;
         box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       ">
-        <h2 style="margin-top: 0; color: #2c3e50;">Mindful Moment</h2>
+        <div style="font-size: 48px; margin-bottom: 16px;">🧘</div>
         
-        <div id="intent-current-intention" style="
-          background: #f0f7ff;
-          padding: 10px;
-          border-radius: 6px;
-          margin: 15px 0;
+        <h2 style="margin: 0 0 8px 0; color: #1e293b;">Mindful Moment</h2>
+        
+        <div style="
+          background: #f0f9ff;
+          padding: 12px;
+          border-radius: 8px;
+          margin: 16px 0;
+          color: #0369a1;
           font-style: italic;
         ">
-          ${currentIntention ? `Your intention: "${currentIntention}"` : 'No active intention set'}
+          "${currentIntention || 'No active intention'}"
         </div>
         
-        <p style="color: #34495e;">
+        <p style="color: #475569; margin-bottom: 20px;">
           You're about to visit <strong>${domain}</strong>
         </p>
         
-        <p style="color: #7f8c8d; font-size: 14px;">
-          Is this aligned with your current intention?
-        </p>
+        <div style="margin: 24px 0;" id="intent-timer-container">
+          <div style="font-size: 14px; color: #64748b; margin-bottom: 8px;">
+            Page will load in <span id="intent-timer">${delaySeconds}</span>s
+          </div>
+          <div style="
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+          ">
+            <div id="intent-progress" style="
+              width: 100%;
+              height: 100%;
+              background: #3498db;
+              transition: width 1s linear;
+            "></div>
+          </div>
+        </div>
         
-        <div style="margin: 20px 0;">
+        <div style="display: flex; gap: 12px;">
           <button id="intent-continue" style="
+            flex: 1;
+            padding: 12px;
             background: #27ae60;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            margin-right: 10px;
-            cursor: pointer;
+            border-radius: 8px;
             font-size: 14px;
-          ">Yes, continue</button>
+            font-weight: 600;
+            cursor: pointer;
+          ">
+            ✓ Continue
+          </button>
           
           <button id="intent-cancel" style="
+            flex: 1;
+            padding: 12px;
             background: #e74c3c;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
+            border-radius: 8px;
             font-size: 14px;
-          ">No, go back</button>
+            font-weight: 600;
+            cursor: pointer;
+          ">
+            ✗ Go Back
+          </button>
         </div>
         
-        <div style="margin-top: 15px; font-size: 12px; color: #95a5a6;">
-          <span id="intent-timer">${delaySeconds}</span> seconds until page loads...
-        </div>
-        
-        <button id="intent-remind-later" style="
+        <button id="intent-snooze" style="
+          margin-top: 16px;
+          padding: 8px;
           background: none;
           border: none;
-          color: #3498db;
+          color: #64748b;
           text-decoration: underline;
-          margin-top: 10px;
           cursor: pointer;
-          font-size: 12px;
-        ">Remind me later for this site</button>
+          font-size: 13px;
+        ">
+          Remind me later (30 min)
+        </button>
       </div>
     </div>
+    
+    <style>
+      @keyframes intent-fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+    </style>
   `;
   
   document.body.appendChild(modal);
@@ -114,37 +209,44 @@ function showMindfulModal(domain, delaySeconds = 5) {
   // Countdown timer
   let secondsLeft = delaySeconds;
   const timerSpan = document.getElementById('intent-timer');
-  const timerInterval = setInterval(() => {
+  const progressBar = document.getElementById('intent-progress');
+  
+  const timer = setInterval(() => {
     secondsLeft--;
     if (timerSpan) timerSpan.textContent = secondsLeft;
+    if (progressBar) {
+      const percent = (secondsLeft / delaySeconds) * 100;
+      progressBar.style.width = percent + '%';
+    }
+    
     if (secondsLeft <= 0) {
-      clearInterval(timerInterval);
+      clearInterval(timer);
+      // Auto-continue if time runs out
+      document.getElementById('intent-continue')?.click();
     }
   }, 1000);
   
-  // Handle continue button
+  // Continue button
   document.getElementById('intent-continue').onclick = () => {
-    clearInterval(timerInterval);
+    clearInterval(timer);
     modal.remove();
-    modalShown = false;
     
     // Tell background we continued
-    chrome.runtime.sendMessage({ 
-      type: 'DISTRACTION_ACTION', 
+    chrome.runtime.sendMessage({
+      type: 'DISTRACTION_ACTION',
       action: 'continued',
       domain: domain
     });
   };
   
-  // Handle cancel button
+  // Cancel button
   document.getElementById('intent-cancel').onclick = () => {
-    clearInterval(timerInterval);
+    clearInterval(timer);
     modal.remove();
-    modalShown = false;
     
     // Tell background we canceled
-    chrome.runtime.sendMessage({ 
-      type: 'DISTRACTION_ACTION', 
+    chrome.runtime.sendMessage({
+      type: 'DISTRACTION_ACTION',
       action: 'canceled',
       domain: domain
     });
@@ -153,18 +255,17 @@ function showMindfulModal(domain, delaySeconds = 5) {
     window.history.back();
   };
   
-  // Handle remind later
-  document.getElementById('intent-remind-later').onclick = () => {
-    clearInterval(timerInterval);
+  // Snooze button
+  document.getElementById('intent-snooze').onclick = () => {
+    clearInterval(timer);
     modal.remove();
-    modalShown = false;
     
-    // Tell background to temporarily allow this site
-    chrome.runtime.sendMessage({ 
-      type: 'DISTRACTION_ACTION', 
+    // Tell background to snooze
+    chrome.runtime.sendMessage({
+      type: 'DISTRACTION_ACTION',
       action: 'snooze',
       domain: domain,
-      duration: 30 // minutes
+      duration: 30
     });
   };
 }

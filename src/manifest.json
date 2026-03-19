@@ -7,13 +7,15 @@
     "storage",
     "tabs",
     "alarms",
-    "idle"
+    "idle",
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "action": {
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/popup.html",
+    "default_title": "Intent"
   },
   "options_page": "options/options.html",
   "background": {
